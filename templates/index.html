@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #search-result tr:hover {
+            background-color: lightgray;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <form id="search-form" onsubmit="return false">
+        <input name="search">
+        <input type="submit" value="Search" onclick="submitRearch()">
+
+        <table width="100%">
+           <thead>
+               <tr>
+                   <th width="30%">Title</th>
+                   <th width="25%">Year</th>
+                   <th width="15%">Author</th>
+                   <th width="8%">ID</th>
+               </tr>
+           </thead>
+           <tbody id="search-result">
+           </tbody>
+        </table>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script type="text/javascript">
+            function submitRearch() {
+                $.ajax({
+                    url: "/search",
+                    method: "POST",
+                    //Serialize converts the searchForm values into a string
+                    data: $("#search-form").serialize(),
+
+                    //Success callback
+                    success: function(rawData) {
+                        var parsed = JSON.parse(rawData)
+                        console.log(parsed)
+                        if(!parsed) return;
+                        var searchResults = $("#search-result");
+                        searchResults.empty();
+
+                        parsed.forEach(function(result) {
+                            var row = $("<tr><td>" + result.Title + "</td><td>" + result.Author +
+                                  "</td><td>" + result.Year + "</td><td>" + result.ID + "</td></tr>")
+                            row.css({
+                                "textAlign": "center",
+                            })
+                            searchResults.append(row) 
+                            row.on("click", function(){
+                                $.ajax({
+                                    url: "/books/add?id=" + result.ID,
+                                    method: "GET"
+                                })
+                            })
+                        });
+                    }
+                });
+                return false
+            }
+        </script>
+    </form>
+</body>
+</html>
